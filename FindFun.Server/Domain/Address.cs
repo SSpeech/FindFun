@@ -21,15 +21,14 @@ public class Address
     public Address(
         string line1,
         string postalCode,
-        Street? street = null,
+        int streetId,
         Point? coordinates = null)
     {
 
         Line1 = line1;
         PostalCode = postalCode;
         Coordinates = coordinates;
-        if (street != null)
-            SetStreet(street);
+        SetStreetId(streetId);
     }
 
     public void SetCoordinates(double longitude, double latitude, int srid = 4326)
@@ -50,5 +49,10 @@ public class Address
         StreetId = street.Id;
         if (!street.Addresses.Contains(this))
             street.AddAddress(this);
+    }
+
+    public void SetStreetId(int streetId)
+    {
+        StreetId = streetId;
     }
 }

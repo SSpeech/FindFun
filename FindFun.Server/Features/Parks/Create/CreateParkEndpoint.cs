@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FindFun.Server.Validations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FindFun.Server.Features.Parks.Create;
 
@@ -12,6 +13,7 @@ public static class CreateParkEndpoint
             return result.IsValid ? Results.Ok(result.Data) : Results.Problem(result.ProblemDetails);
         })
         .WithName("CreatePark")
-        .WithTags("Parks").DisableAntiforgery();
+        .WithTags("Parks").DisableAntiforgery()
+        .AddEndpointFilter<ValidationFilter<CreateParkCommand>>();
     }
 }

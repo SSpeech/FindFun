@@ -1,5 +1,8 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FindFun.Server.Validations;
+using Microsoft.AspNetCore.Mvc;
 using NetTopologySuite.Geometries;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace FindFun.Server.Features.Parks.Create;
 
@@ -44,15 +47,18 @@ public record CreateParkCommand(
      string? PostalCode
 ) 
 {
-    public CoordinateDto ParseCoordinate()
+    public Result<CoordinateDto> ParseCoordinate()
     {
         var parts = Coordinates.Split(',');
-        if (parts.Length == 2 && double.TryParse(parts[0], out var longitude) && double.TryParse(parts[1], out var latitude))
+        if (parts.Length == 2 && double.TryParse(parts[0],CultureInfo.InvariantCulture, out var longitude) && double.TryParse(parts[1], CultureInfo.InvariantCulture, out var latitude))
         {
-            return new CoordinateDto(longitude, latitude);
+            return Result<CoordinateDto>.Success(new CoordinateDto(longitude, latitude));
         }
 
-        throw new FormatException("Invalid coordinate format.");
+        return Result<CoordinateDto>.Failure(new ValidationProblemDetails
+        {
+         Errors = new Dictionary<string, string[]> {{ "Coordinates", ["Invalid coordinate format."] } }
+        });
     }
 }
 

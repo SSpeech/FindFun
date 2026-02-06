@@ -59,5 +59,12 @@ public class Street
             municipio.Streets.Add(this);
     }
 
+    // New: set the foreign key without loading the Municipality entity
+    public void SetMunicipioId(int municipioGid)
+    {
+        Municipio = null;
+        MunicipioGid = municipioGid;
+    }
+
 }
 
