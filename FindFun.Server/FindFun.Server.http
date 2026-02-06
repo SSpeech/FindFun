@@ -1,0 +1,6 @@
+@FindFun.Server_HostAddress = http://localhost:5119
+
+GET {{FindFun.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

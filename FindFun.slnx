@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="FindFun.AppHost/FindFun.AppHost.csproj" />
+  <Project Path="findfun.client/findfun.client.esproj">
+    <Build />
+  </Project>
+  <Project Path="FindFun.Server/FindFun.Server.csproj" />
+  <Project Path="FindFun.ServiceDefaults/FindFun.ServiceDefaults.csproj" />
+</Solution>
