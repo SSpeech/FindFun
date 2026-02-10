@@ -1,12 +1,12 @@
-﻿using FindFun.Server.Validations;
+﻿using FindFun.Server.Domain;
+using FindFun.Server.Validations;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Geometries;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
 namespace FindFun.Server.Features.Parks.Create;
 
-public record CreateParkCommand(
+public record CreateParkRequest(
     [Required]
     [StringLength(100, MinimumLength = 2)]
     string Name,
@@ -28,7 +28,7 @@ public record CreateParkCommand(
     IFormFileCollection ParkImages,
 
     string? ClosingSchedule,
-        [Required]
+     [Required]
      string Coordinates,
 
     [StringLength(200)]
@@ -60,49 +60,39 @@ public record CreateParkCommand(
          Errors = new Dictionary<string, string[]> {{ "Coordinates", ["Invalid coordinate format."] } }
         });
     }
-}
-
-public record AmenityGroup(
-    [MinLength(1)]
-    List<string> Items,
-    string? Note);
-public record ClosingSchedule(bool VenueCloses, List<string> Schedules) : IValidatableObject
-{
-    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    public List<ClosingScheduleEntry> ParseClosingScheduleParse(string? closingSchedule)
     {
-        if (VenueCloses && (Schedules == null || Schedules.Count == 0))
+        var result = new List<ClosingScheduleEntry>();
+        if (!string.IsNullOrWhiteSpace(closingSchedule))
         {
-            yield return new ValidationResult(
-                "If 'VenunCloses' is true, 'Schedules' must not be null or empty.",
-                [nameof(Schedules)]
-            );
+            var schedules = closingSchedule
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            foreach (var schedule in schedules)
+            {
+                var dayAndTimes = schedule.Split(':', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var times = dayAndTimes[1].Split('-', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                result.Add(new ClosingScheduleEntry(dayAndTimes[0],times[0], times.Length < 2 ? string.Empty : times[1], false));
+            }
         }
+        return result;
+    }
+    public Result<(string, string?)> ParseAmenityGroup(string amenities)
+    {
+        if (string.IsNullOrWhiteSpace(amenities))
+        {
+            return Result<(string, string?)>.Failure(new ValidationProblemDetails
+            {
+                Errors = new Dictionary<string, string[]> { { "Amenities", ["Amenities cannot be empty."] } }
+            });
+        }
+
+        var parts = amenities.Split(':', 2, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        var note = parts.Length > 1 ? parts[1] : null;
+        return Result<(string, string?)>.Success((parts[0], note));
     }
 }
-public record LocationDetails
-(
-    [Required]
-     CoordinateDto Coordinates,
 
-    [StringLength(200)]
-     string? FormattedAddress,
 
-    [StringLength(100, MinimumLength = 2)]
-     string? Street,
-
-    [StringLength(20)]
-     string? StreetNumber,
-
-    [StringLength(100)]
-     string? Locality,
-
-    [StringLength(5, MinimumLength = 5)]
-     string? PostalCode 
-);
-
-public record CoordinateDto(
-    [Required]
-    double Longitude,
-    [Required]
-    double Latitude
-);
+public record CoordinateDto([Required] double Longitude,[Required] double Latitude);

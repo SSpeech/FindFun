@@ -28,5 +28,9 @@ public class ParkConfiguration : IEntityTypeConfiguration<Park>
             .WithMany()
             .HasForeignKey(x => x.AddressId)
             .IsRequired();
+
+        builder.HasOne(x => x.ClosingSchedule)
+            .WithOne(x => x.Park)
+            .HasForeignKey<ClosingSchedule>(x => x.ParkId);
     }
 }

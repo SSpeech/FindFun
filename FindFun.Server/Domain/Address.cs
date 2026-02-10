@@ -11,7 +11,7 @@ public class Address
     public Point? Coordinates { get; private set; }
 
     public Street? Street { get; private set; }
-    public int? StreetId { get; private set; }
+    public int StreetId { get; private set; }
 
     protected Address()
     {
@@ -21,14 +21,15 @@ public class Address
     public Address(
         string line1,
         string postalCode,
-        int streetId,
-        Point? coordinates = null)
+        Street street,
+        double longitude,
+        double latitude)
     {
 
         Line1 = line1;
         PostalCode = postalCode;
-        Coordinates = coordinates;
-        SetStreetId(streetId);
+        SetCoordinates(longitude, latitude);
+        SetStreet(street);
     }
 
     public void SetCoordinates(double longitude, double latitude, int srid = 4326)
@@ -41,7 +42,6 @@ public class Address
         if (street is null)
         {
             Street = null;
-            StreetId = null;
             return;
         }
 

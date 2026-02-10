@@ -1,11 +1,10 @@
-﻿
-
-namespace FindFun.Server.Domain;
+﻿namespace FindFun.Server.Domain;
 
 public class ParkAmenity
 {
-    public Guid ParkId { get; set; }
+    public int Id { get; private set; }
+    public int ParkId { get; set; }
     public Park Park { get; set; } = null!;
-    public Guid AmenityId { get; set; }
+    public int AmenityId { get; set; }
     public Amenity Amenity { get; set; } = null!;
 }

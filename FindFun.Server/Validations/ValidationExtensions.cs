@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FindFun.Server.Validations;
 
-public static class ValidationExtensions
+public static class ProblemDetailsResultExtensions
 {
     public static Result<T> ValidateWithProblemDetails<T>(this T obj, bool includeAllErrors = default)
     {
@@ -16,10 +16,10 @@ public static class ValidationExtensions
         if (isValid)
             return  Result<T>.Success();
 
-        return BuildResult<T>(includeAllErrors, results);
+        return BuildValidationProblemResult<T>(includeAllErrors, results);
     }
 
-    private static  Result<T> BuildResult<T>(bool includeAllErrors, List<ValidationResult> results)
+    private static  Result<T> BuildValidationProblemResult<T>(bool includeAllErrors, List<ValidationResult> results)
     {
         var modelState = new ModelStateDictionary();
         var errorsToProcess = includeAllErrors ? results : results.Take(1);
@@ -39,9 +39,9 @@ public static class ValidationExtensions
         return  Result<T>.Failure(problemDetails);
     }
 
-    public static  Result<TResult> CreateValidationError<T, TResult>(string fieldName, string errorMessage, int statusCode = StatusCodes.Status404NotFound)
+    public static  Result<TResult> CreateProblemResult<T, TResult>(string fieldName, string errorMessage, int statusCode = StatusCodes.Status404NotFound)
     {
-        var (title, type) = GetValidationTitleAndType(statusCode);
+        var (title, type) = GetProblemDetailsTitleAndType(statusCode);
         var problemDetails = new ValidationProblemDetails
         {
             Title = title,
@@ -52,10 +52,12 @@ public static class ValidationExtensions
 
         return  Result<TResult>.Failure(problemDetails);
     }
-    private static (string Title, string Type) GetValidationTitleAndType(int statusCode)
+
+    private static (string Title, string Type) GetProblemDetailsTitleAndType(int statusCode)
     {
         return (ReasonPhrases.GetReasonPhrase(statusCode), GetProblemDetailsType(statusCode));
     }
+
     private static string GetProblemDetailsType(int statusCode)
     {
         return statusCode switch
@@ -69,6 +71,7 @@ public static class ValidationExtensions
             _ => ProblemDetailsConstants.Default
         };
     }
-    public static Result<TResult> CreateError<T, TResult>(this int statusCode, string fieldName, string errorMessage)
-        => CreateValidationError<T, TResult>(fieldName, errorMessage, statusCode);
+
+    public static Result<TResult> CreateProblemResult<T, TResult>(this int statusCode, string fieldName, string errorMessage)
+        => CreateProblemResult<T, TResult>(fieldName, errorMessage, statusCode);
 }

@@ -8,7 +8,10 @@ public class FindFunDbContext(DbContextOptions<FindFunDbContext> options) : DbCo
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Street> Streets => Set<Street>();
     public DbSet<Park> Parks => Set<Park>();
+    public DbSet<Amenity> Amenities => Set<Amenity>();
+    public DbSet<ParkAmenity> ParkAmenities => Set<ParkAmenity>();
     public DbSet<Municipality> Municipalities => Set<Municipality>();
+    public DbSet<ClosingSchedule> ClosingSchedules => Set<ClosingSchedule>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

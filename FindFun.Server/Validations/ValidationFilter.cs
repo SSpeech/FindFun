@@ -1,6 +1,6 @@
 ﻿namespace FindFun.Server.Validations;
 
-public class ValidationFilter<T> : IEndpointFilter
+public class RequestValidationFilter<T> : IEndpointFilter
 {
     public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
     {
