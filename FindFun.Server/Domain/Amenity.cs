@@ -1,6 +1,4 @@
-﻿
-
-namespace FindFun.Server.Domain;
+﻿namespace FindFun.Server.Domain;
 
 public class Amenity
 {

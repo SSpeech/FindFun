@@ -1,5 +1,6 @@
 ﻿namespace FindFun.Server.Domain;
 using System.Collections.Generic;
+using System.Linq;
 
 public class Park
 {
@@ -14,6 +15,8 @@ public class Park
 
     private readonly List<ParkAmenity> _amenities = [];
     public IReadOnlyCollection<ParkAmenity> Amenities => _amenities;
+    private readonly List<ParkImage> _images = [];
+    public IReadOnlyCollection<ParkImage> Images => _images;
 
     protected Park()
     {
@@ -47,5 +50,16 @@ public class Park
     public void ClearAmenities()
     {
         _amenities.Clear();
+    }
+
+    public void AddImages(IEnumerable<ParkImage> images)
+    {
+        if (images is null) return;
+        _images.AddRange(images);
+    }
+
+    public void ClearImages()
+    {
+        _images.Clear();
     }
 }

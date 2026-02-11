@@ -1,6 +1,6 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgresPassword = builder.AddParameter("postgres-password",secret:true);
+var postgresPassword = builder.AddParameter("postgres-password", secret: true);
 
 var postgres = builder.AddPostgres("postgres")
     .WithImage("postgis/postgis")
@@ -16,8 +16,17 @@ var postgres = builder.AddPostgres("postgres")
 
 var db = postgres.AddDatabase("findfun");
 
+var storage = builder.AddAzureStorage("storage")
+    .RunAsEmulator(azurite =>
+    {
+        azurite.WithDataVolume();
+    });
+
+var blobs = storage.AddBlobs("blobs");
+
 builder.AddProject<Projects.FindFun_Server>("findfun-server")
     .WithReference(db)
+    .WithReference(blobs)
     .WaitFor(db);
 
 builder.Build().Run();
