@@ -31,7 +31,7 @@ public record CreateParkRequest(
      string? Street,
 
     [StringLength(20)]
-     string? StreetNumber,
+     string? Number,
 
     [StringLength(100)]
      string? Locality,

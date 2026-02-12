@@ -1,4 +1,6 @@
 ﻿namespace FindFun.Server.Domain;
+
+using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -11,6 +13,13 @@ public class Park
     public Address Address { get; private set; } = null!;
     public int AddressId { get; private set; }
 
+    public decimal EntranceFee { get; private set; }
+
+    public string? Organizer { get; private set; }
+    public string? AgeRecommendation { get; private set; }
+    public string? ParkType { get; private set; }
+    public bool IsFree { get; private set; }
+
     public ClosingSchedule? ClosingSchedule { get; private set; }
 
     private readonly List<ParkAmenity> _amenities = [];
@@ -22,12 +31,18 @@ public class Park
     {
     }
 
-    public Park(string name, string description, Address address)
+    public Park(string name, string description, Address address,decimal entranceFee, bool isFree, string?
+        organizer, string parkType, string? ageRecomandation)
     {
         Name = name;
         Description = description;
         Address = address;
         AddressId = address.Id;
+        EntranceFee = entranceFee;
+        IsFree = isFree;
+        Organizer = organizer;
+        ParkType = parkType;
+        AgeRecommendation = ageRecomandation;
     }
 
     public void SetClosingSchedule(ClosingSchedule schedule)

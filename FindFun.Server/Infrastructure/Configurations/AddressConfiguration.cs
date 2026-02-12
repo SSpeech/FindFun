@@ -14,13 +14,14 @@ public class AddressConfiguration : IEntityTypeConfiguration<Address>
         builder.Property(x => x.Id).HasColumnName("id")
             .ValueGeneratedOnAdd();
 
-        builder.Property(x => x.Line1).HasColumnName("line1");
+        builder.Property(x => x.Line).HasColumnName("line1");
         builder.Property(x => x.PostalCode).HasColumnName("postal_code");
         builder.Property(x => x.Coordinates)
             .HasColumnName("coordinates")
             .HasColumnType("geometry");
 
         builder.Property(x => x.StreetId).HasColumnName("street_id");
+        builder.Property(x => x.Number).HasColumnName("number");
 
         builder.HasIndex(x => x.StreetId);
 

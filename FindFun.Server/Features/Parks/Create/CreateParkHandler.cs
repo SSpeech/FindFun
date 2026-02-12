@@ -2,12 +2,11 @@
 using FindFun.Server.Infrastructure;
 using FindFun.Server.Shared;
 using FindFun.Server.Validations;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace FindFun.Server.Features.Parks.Create;
 
-public class CreateParkHandler(FindFunDbContext dbContext)
+public class CreateParkHandler(FindFunDbContext dbContext, ILogger<CreateParkHandler> logger)
 {
     public async Task<Result<int>> HandleAsync(CreateParkRequest request, FileUpLoad fileUpLoad, CancellationToken cancellationToken)
     {
@@ -43,7 +42,7 @@ public class CreateParkHandler(FindFunDbContext dbContext)
         var existingAddress = await dbContext.Addresses
             .Include(a => a.Street)
             .FirstOrDefaultAsync(a =>
-                a.Line1 == request.FormattedAddress
+                a.Line == request.FormattedAddress
                 && a.Street!.MunicipioGid == municipalityId
                 && a.Street.Name == request.Street, cancellationToken);
 
@@ -75,7 +74,8 @@ public class CreateParkHandler(FindFunDbContext dbContext)
             request.PostalCode!,
             street!,
             coordinates.Data!.Longitude,
-            coordinates.Data.Latitude
+            coordinates.Data.Latitude,
+            request.Number!
         );
 
         if (existingAddress is null)
@@ -85,7 +85,13 @@ public class CreateParkHandler(FindFunDbContext dbContext)
         var park = new Park(
             request.Name,
             request.Description!,
-            address
+            address,
+            request.EntranceFee,
+            request.IsFree,
+            request.Organizer,
+            request.ParkType,
+            request.AgeRecommendation
+            
         );
         await dbContext.Parks.AddAsync(park, cancellationToken);
 
@@ -106,7 +112,8 @@ public class CreateParkHandler(FindFunDbContext dbContext)
         var images = uploaded.Select(r => new ParkImage(r.Data!)).ToList();
         park.AddImages(images);
 
-        var amenity = new Amenity { Name = amenityGroup.Data.Item1, Description = amenityGroup.Data.Item2 ?? string.Empty };
+        var (amenityNames, amenityDescription) = amenityGroup.Data;
+        var amenity = new Amenity { Name = amenityNames, Description = amenityDescription ?? string.Empty };
         park.AddAmenity(amenity);
 
         try
@@ -114,8 +121,9 @@ public class CreateParkHandler(FindFunDbContext dbContext)
             await dbContext.SaveChangesAsync(cancellationToken);
             return Result<int>.Success(park.Id);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to create park '{ParkName}'", request.Name);
             await FileValidation.DeleteUploadedFilesAsync(uploaded, fileUpLoad, cancellationToken);
             return StatusCodes.Status500InternalServerError.CreateProblemResult<CreateParkRequest, int>("Park", "Failed to create park.");
         }
