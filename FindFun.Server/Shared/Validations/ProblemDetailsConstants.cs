@@ -1,4 +1,4 @@
-﻿namespace FindFun.Server.Validations;
+﻿namespace FindFun.Server.Shared.Validations;
 
 public static class ProblemDetailsConstants
 {

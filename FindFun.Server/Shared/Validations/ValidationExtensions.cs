@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using System.ComponentModel.DataAnnotations;
 
-namespace FindFun.Server.Validations;
+namespace FindFun.Server.Shared.Validations;
 
 public static class ProblemDetailsResultExtensions
 {

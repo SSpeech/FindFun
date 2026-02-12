@@ -1,8 +1,8 @@
 using FindFun.Server.Domain;
-using FindFun.Server.Validations;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.ComponentModel.DataAnnotations;
+using FindFun.Server.Shared.Validations;
 
 namespace FindFun.Server.Shared;
 

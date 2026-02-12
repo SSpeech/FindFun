@@ -1,5 +1,5 @@
 ﻿using FindFun.Server.Shared;
-using FindFun.Server.Validations;
+using FindFun.Server.Shared.Validations;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FindFun.Server.Features.Parks.Create;

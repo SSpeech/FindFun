@@ -1,7 +1,8 @@
 ﻿using FindFun.Server.Domain;
 using FindFun.Server.Infrastructure;
 using FindFun.Server.Shared;
-using FindFun.Server.Validations;
+using FindFun.Server.Shared.File;
+using FindFun.Server.Shared.Validations;
 using Microsoft.EntityFrameworkCore;
 
 namespace FindFun.Server.Features.Parks.Create;

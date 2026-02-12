@@ -1,8 +1,7 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using FindFun.Server.Validations;
 
-namespace FindFun.Server.Shared;
+namespace FindFun.Server.Shared.File;
 
 public class FileUpLoad(
     BlobServiceClient blobServiceClient,

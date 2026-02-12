@@ -1,7 +1,6 @@
-using FindFun.Server.Validations;
 using System.ComponentModel.DataAnnotations;
 
-namespace FindFun.Server.Shared;
+namespace FindFun.Server.Shared.File;
 
 public class FileValidation
 {
