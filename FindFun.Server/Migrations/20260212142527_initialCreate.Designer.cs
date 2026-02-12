@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FindFun.Server.Migrations
 {
     [DbContext(typeof(FindFunDbContext))]
-    [Migration("20260211134032_AddFile")]
-    partial class AddFile
+    [Migration("20260212142527_initialCreate")]
+    partial class initialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,10 +39,15 @@ namespace FindFun.Server.Migrations
                         .HasColumnType("geometry")
                         .HasColumnName("coordinates");
 
-                    b.Property<string>("Line1")
+                    b.Property<string>("Line")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("line1");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("number");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
@@ -202,15 +207,45 @@ namespace FindFun.Server.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("address_id");
 
+                    b.Property<string>("AgeRecommendation")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("all")
+                        .HasColumnName("age_recommendation");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
 
+                    b.Property<decimal>("EntranceFee")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("entrance_fee");
+
+                    b.Property<bool>("IsFree")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_free");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
+
+                    b.Property<string>("Organizer")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("organizer");
+
+                    b.Property<string>("ParkType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("park_type");
 
                     b.HasKey("Id");
 
@@ -291,6 +326,9 @@ namespace FindFun.Server.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MunicipioGid");
+
+                    b.HasIndex("Name", "MunicipioGid")
+                        .IsUnique();
 
                     b.ToTable("streets", (string)null);
                 });

@@ -324,6 +324,9 @@ namespace FindFun.Server.Migrations
 
                     b.HasIndex("MunicipioGid");
 
+                    b.HasIndex("Name", "MunicipioGid")
+                        .IsUnique();
+
                     b.ToTable("streets", (string)null);
                 });
 

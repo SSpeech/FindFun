@@ -1,4 +1,5 @@
 ﻿using FindFun.Server.Shared;
+using FindFun.Server.Shared.File;
 using FindFun.Server.Shared.Validations;
 using Microsoft.AspNetCore.Mvc;
 
