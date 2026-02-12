@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace FindFun.Server.Validations;
+namespace FindFun.Server.Shared;
 
 public class Result<T>
 {

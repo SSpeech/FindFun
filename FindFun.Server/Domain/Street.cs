@@ -14,16 +14,14 @@ public class Street
     {
         
     }
-    public Street(string name, Municipality? municipio = null)
+    public Street(string name, int municipalityId)
     {
         Name = name;
-        if (municipio != null)
-            SetMunicipio(municipio);
+        SetMunicipioId(municipalityId);
     }
 
     public void AddAddress(Address address)
     {
-        if (address == null) return;
         if (!Addresses.Contains(address))
         {
             Addresses.Add(address);
@@ -34,29 +32,12 @@ public class Street
 
     public void RemoveAddress(Address address)
     {
-        if (address is null) return;
-        if (Addresses.Remove(address))
-        {
-            if (address.Street == this)
-            {
-                address.SetStreet(null);
-            }
-        }
+        if (Addresses.Remove(address) && address.Street == this)
+            address.SetStreet(null);
     }
-
-    public void SetMunicipio(Municipality? municipio)
+    public void SetMunicipioId(int municipioGid)
     {
-        if (municipio is null)
-        {
-            Municipio = null;
-            MunicipioGid = 0;
-            return;
-        }
-
-        Municipio = municipio;
-        MunicipioGid = municipio.Gid;
-        if (!municipio.Streets.Contains(this))
-            municipio.Streets.Add(this);
+        MunicipioGid = municipioGid;
     }
 
 }

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FindFun.Server.Shared;
+using FindFun.Server.Shared.File;
+using FindFun.Server.Shared.Validations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace FindFun.Server.Features.Parks.Create;
 
@@ -6,12 +9,13 @@ public static class CreateParkEndpoint
 {
     public static void MapCreateParkEndpoint(this IEndpointRouteBuilder app)
     {
-        app.MapPost("", async (CreateParkHandler handler, [FromForm] CreateParkCommand request, CancellationToken cancellationToken) =>
+        app.MapPost("", async (CreateParkHandler handler, FileUpLoad fileUpLoad, [FromForm] CreateParkRequest request, CancellationToken cancellationToken) =>
         {
-            var result = await handler.HandleAsync(request, cancellationToken);
+            var result = await handler.HandleAsync(request, fileUpLoad, cancellationToken);
             return result.IsValid ? Results.Ok(result.Data) : Results.Problem(result.ProblemDetails);
         })
         .WithName("CreatePark")
-        .WithTags("Parks").DisableAntiforgery();
+        .WithTags("Parks").DisableAntiforgery()
+        .AddEndpointFilter<RequestValidationFilter<CreateParkRequest>>();
     }
 }

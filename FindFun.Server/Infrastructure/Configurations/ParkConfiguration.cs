@@ -22,11 +22,36 @@ public class ParkConfiguration : IEntityTypeConfiguration<Park>
         builder.Property(x => x.AddressId)
             .HasColumnName("address_id");
 
+        builder.Property(x => x.EntranceFee)
+            .HasColumnName("entrance_fee")
+            .HasPrecision(10, 2)
+            .HasDefaultValue(0m);
+
+        builder.Property(x => x.IsFree)
+            .HasColumnName("is_free")
+            .HasDefaultValue(true);
+
+        builder.Property(x => x.Organizer)
+            .HasColumnName("organizer")
+            .HasMaxLength(255);
+
+        builder.Property(x => x.AgeRecommendation)
+            .HasColumnName("age_recommendation")
+            .HasMaxLength(100).HasDefaultValue("all");
+
+        builder.Property(x => x.ParkType)
+            .HasColumnName("park_type")
+            .HasMaxLength(100);
+
         builder.HasIndex(x => x.AddressId);
 
         builder.HasOne(x => x.Address)
             .WithMany()
             .HasForeignKey(x => x.AddressId)
             .IsRequired();
+
+        builder.HasOne(x => x.ClosingSchedule)
+            .WithOne(x => x.Park)
+            .HasForeignKey<ClosingSchedule>(x => x.ParkId);
     }
 }

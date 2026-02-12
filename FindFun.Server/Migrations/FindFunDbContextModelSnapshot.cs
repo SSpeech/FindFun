@@ -36,17 +36,22 @@ namespace FindFun.Server.Migrations
                         .HasColumnType("geometry")
                         .HasColumnName("coordinates");
 
-                    b.Property<string>("Line1")
+                    b.Property<string>("Line")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("line1");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("number");
 
                     b.Property<string>("PostalCode")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("postal_code");
 
-                    b.Property<int?>("StreetId")
+                    b.Property<int>("StreetId")
                         .HasColumnType("integer")
                         .HasColumnName("street_id");
 
@@ -55,6 +60,51 @@ namespace FindFun.Server.Migrations
                     b.HasIndex("StreetId");
 
                     b.ToTable("addresses", (string)null);
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.Amenity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("amenities", (string)null);
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.ClosingSchedule", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ParkId")
+                        .HasColumnType("integer")
+                        .HasColumnName("park_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParkId")
+                        .IsUnique();
+
+                    b.ToTable("closing_schedules", (string)null);
                 });
 
             modelBuilder.Entity("FindFun.Server.Domain.Municipality", b =>
@@ -78,7 +128,6 @@ namespace FindFun.Server.Migrations
                         .HasColumnName("iso_3166_3");
 
                     b.Property<string>("LocalName")
-                        .IsRequired()
                         .HasMaxLength(255)
                         .HasColumnType("character varying(255)")
                         .HasColumnName("local_name_");
@@ -133,6 +182,12 @@ namespace FindFun.Server.Migrations
 
                     b.HasKey("Gid");
 
+                    b.HasIndex("Geometry");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geometry"), "GIST");
+
+                    b.HasIndex("OfficialNa6");
+
                     b.ToTable("georef-spain-municipio-millesime", "public");
                 });
 
@@ -149,21 +204,102 @@ namespace FindFun.Server.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("address_id");
 
+                    b.Property<string>("AgeRecommendation")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasDefaultValue("all")
+                        .HasColumnName("age_recommendation");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("description");
+
+                    b.Property<decimal>("EntranceFee")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("entrance_fee");
+
+                    b.Property<bool>("IsFree")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_free");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("name");
 
+                    b.Property<string>("Organizer")
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("organizer");
+
+                    b.Property<string>("ParkType")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("park_type");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AddressId");
 
                     b.ToTable("parks", (string)null);
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.ParkAmenity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AmenityId")
+                        .HasColumnType("integer")
+                        .HasColumnName("amenity_id");
+
+                    b.Property<int>("ParkId")
+                        .HasColumnType("integer")
+                        .HasColumnName("park_id");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AmenityId");
+
+                    b.HasIndex("ParkId");
+
+                    b.ToTable("park_amenities", (string)null);
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.ParkImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ParkId")
+                        .HasColumnType("integer")
+                        .HasColumnName("park_id");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("url");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParkId");
+
+                    b.ToTable("park_images", (string)null);
                 });
 
             modelBuilder.Entity("FindFun.Server.Domain.Street", b =>
@@ -188,6 +324,9 @@ namespace FindFun.Server.Migrations
 
                     b.HasIndex("MunicipioGid");
 
+                    b.HasIndex("Name", "MunicipioGid")
+                        .IsUnique();
+
                     b.ToTable("streets", (string)null);
                 });
 
@@ -195,9 +334,64 @@ namespace FindFun.Server.Migrations
                 {
                     b.HasOne("FindFun.Server.Domain.Street", "Street")
                         .WithMany("Addresses")
-                        .HasForeignKey("StreetId");
+                        .HasForeignKey("StreetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Street");
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.ClosingSchedule", b =>
+                {
+                    b.HasOne("FindFun.Server.Domain.Park", "Park")
+                        .WithOne("ClosingSchedule")
+                        .HasForeignKey("FindFun.Server.Domain.ClosingSchedule", "ParkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsMany("FindFun.Server.Domain.ClosingScheduleEntry", "Entries", b1 =>
+                        {
+                            b1.Property<int>("id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("id"));
+
+                            b1.Property<string>("ClosesAt")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("closes_at");
+
+                            b1.Property<string>("Day")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("day");
+
+                            b1.Property<bool>("IsClosed")
+                                .HasColumnType("boolean")
+                                .HasColumnName("is_closed");
+
+                            b1.Property<string>("OpensAt")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("opens_at");
+
+                            b1.Property<int>("closing_schedule_id")
+                                .HasColumnType("integer");
+
+                            b1.HasKey("id");
+
+                            b1.HasIndex("closing_schedule_id");
+
+                            b1.ToTable("closing_schedule_entries", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("closing_schedule_id");
+                        });
+
+                    b.Navigation("Entries");
+
+                    b.Navigation("Park");
                 });
 
             modelBuilder.Entity("FindFun.Server.Domain.Park", b =>
@@ -211,6 +405,36 @@ namespace FindFun.Server.Migrations
                     b.Navigation("Address");
                 });
 
+            modelBuilder.Entity("FindFun.Server.Domain.ParkAmenity", b =>
+                {
+                    b.HasOne("FindFun.Server.Domain.Amenity", "Amenity")
+                        .WithMany("ParkAmenities")
+                        .HasForeignKey("AmenityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FindFun.Server.Domain.Park", "Park")
+                        .WithMany("Amenities")
+                        .HasForeignKey("ParkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Amenity");
+
+                    b.Navigation("Park");
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.ParkImage", b =>
+                {
+                    b.HasOne("FindFun.Server.Domain.Park", "Park")
+                        .WithMany("Images")
+                        .HasForeignKey("ParkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Park");
+                });
+
             modelBuilder.Entity("FindFun.Server.Domain.Street", b =>
                 {
                     b.HasOne("FindFun.Server.Domain.Municipality", "Municipio")
@@ -222,9 +446,23 @@ namespace FindFun.Server.Migrations
                     b.Navigation("Municipio");
                 });
 
+            modelBuilder.Entity("FindFun.Server.Domain.Amenity", b =>
+                {
+                    b.Navigation("ParkAmenities");
+                });
+
             modelBuilder.Entity("FindFun.Server.Domain.Municipality", b =>
                 {
                     b.Navigation("Streets");
+                });
+
+            modelBuilder.Entity("FindFun.Server.Domain.Park", b =>
+                {
+                    b.Navigation("Amenities");
+
+                    b.Navigation("ClosingSchedule");
+
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("FindFun.Server.Domain.Street", b =>

@@ -5,13 +5,14 @@ namespace FindFun.Server.Domain;
 public class Address
 {
     public int Id { get; private set; }
-    public string Line1 { get; private set; } = null!;
+    public string Line { get; private set; } = null!;
     public string PostalCode { get; private set; } = null!;
 
     public Point? Coordinates { get; private set; }
+    public string Number { get; private set; }
 
     public Street? Street { get; private set; }
-    public int? StreetId { get; private set; }
+    public int StreetId { get; private set; }
 
     protected Address()
     {
@@ -21,15 +22,16 @@ public class Address
     public Address(
         string line1,
         string postalCode,
-        Street? street = null,
-        Point? coordinates = null)
+        Street street,
+        double longitude,
+        double latitude,string number)
     {
 
-        Line1 = line1;
+        Line = line1;
         PostalCode = postalCode;
-        Coordinates = coordinates;
-        if (street != null)
-            SetStreet(street);
+        SetCoordinates(longitude, latitude);
+        Number = number;
+        SetStreet(street);
     }
 
     public void SetCoordinates(double longitude, double latitude, int srid = 4326)
@@ -42,7 +44,6 @@ public class Address
         if (street is null)
         {
             Street = null;
-            StreetId = null;
             return;
         }
 
@@ -50,5 +51,10 @@ public class Address
         StreetId = street.Id;
         if (!street.Addresses.Contains(this))
             street.AddAddress(this);
+    }
+
+    public void SetStreetId(int streetId)
+    {
+        StreetId = streetId;
     }
 }

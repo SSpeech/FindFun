@@ -1,60 +1,132 @@
 ﻿using FindFun.Server.Domain;
 using FindFun.Server.Infrastructure;
-using FindFun.Server.Validations;
-using Microsoft.AspNetCore.Mvc;
+using FindFun.Server.Shared;
+using FindFun.Server.Shared.File;
+using FindFun.Server.Shared.Validations;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
 
 namespace FindFun.Server.Features.Parks.Create;
 
-public class CreateParkHandler(FindFunDbContext dbContext)
+public class CreateParkHandler(FindFunDbContext dbContext, ILogger<CreateParkHandler> logger)
 {
-    public async Task<Result<int>> HandleAsync(CreateParkCommand request, CancellationToken cancellationToken)
+    public async Task<Result<int>> HandleAsync(CreateParkRequest request, FileUpLoad fileUpLoad, CancellationToken cancellationToken)
     {
-        var municipality = await dbContext.Municipalities
-            .FirstOrDefaultAsync(m => m.OfficialNa == request.Locality, cancellationToken);
-
-        if (municipality is null)
+        var fileValidationResult = FileValidation.ValidateFiles(request.ParkImages).ToList();
+        if (fileValidationResult.Count != 0)
         {
-            var problemDetails = new ValidationProblemDetails
+            var validationResult = fileValidationResult.First();
+            return StatusCodes.Status400BadRequest.CreateProblemResult<CreateParkRequest, int>(validationResult.MemberNames.FirstOrDefault() ?? "ParkImages", validationResult.ErrorMessage!);
+        }
+
+        var entranceFee = ValidationHelper.ValidateEntrance(request.IsFree, request.EntranceFee);
+        if (!entranceFee.IsValid)
+            return Result<int>.Failure(entranceFee.ProblemDetails!);
+
+        var coordinates = ValidationHelper.ParseCoordinate(request.Coordinates);
+        if (!coordinates.IsValid)
+            return Result<int>.Failure(coordinates.ProblemDetails!);
+
+        var amenityGroup = ValidationHelper.ParseAmenityGroup(request.Amenities);
+        if (!amenityGroup.IsValid)
+            return Result<int>.Failure(amenityGroup.ProblemDetails!);
+
+        var municipalityId = await dbContext.Municipalities.AsNoTracking()
+            .Where(m => m.OfficialNa6 == request.Locality)
+            .Select(m => m.Gid)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (municipalityId == 0)
+        {
+            return StatusCodes.Status400BadRequest.CreateProblemResult<CreateParkRequest, int>("Locality", "Locality not found.");
+        }
+
+        var existingAddress = await dbContext.Addresses
+            .Include(a => a.Street)
+            .FirstOrDefaultAsync(a =>
+                a.Line == request.FormattedAddress
+                && a.Street!.MunicipioGid == municipalityId
+                && a.Street.Name == request.Street, cancellationToken);
+
+        if (existingAddress is not null)
+        {
+            var parkExists = await dbContext.Parks
+                .AsNoTracking()
+                .AnyAsync(p => p.AddressId == existingAddress.Id, cancellationToken);
+
+            if (parkExists)
+                return StatusCodes.Status409Conflict.CreateProblemResult<CreateParkRequest, int>("Address", "The address already exists.");
+        }
+
+        Street? street = existingAddress?.Street;
+        if (street is null)
+        {
+            street = await dbContext.Streets
+                .FirstOrDefaultAsync(s => s.Name == request.Street && s.MunicipioGid == municipalityId, cancellationToken);
+
+            if (street is null)
             {
-                Errors = new Dictionary<string, string[]>
-                {
-                    { "LocationDetails.Locality", ["Municipality not found."] }
-                }
-            };
-            return Result<int>.Failure(problemDetails);
+                street = new Street(request.Street!, municipalityId);
+                await dbContext.Streets.AddAsync(street, cancellationToken);
+            }
         }
 
-        var street = await dbContext.Streets
-            .FirstOrDefaultAsync(s => s.Name == request.Street && s.MunicipioGid == municipality.Gid, cancellationToken);
-
-        if (street is null && request.Street is not null)
-        {
-            street = new Street(request.Street, municipality);
-            dbContext.Streets.Add(street);
-        }
-        var coordinates = request.ParseCoordinate();
-        Point? point = new(coordinates.Longitude, coordinates.Latitude) { SRID = 4326 };
-
-
-        var address = new Address(
+        var address = existingAddress ?? new Address(
             request.FormattedAddress!,
             request.PostalCode!,
-            street,
-            point
+            street!,
+            coordinates.Data!.Longitude,
+            coordinates.Data.Latitude,
+            request.Number!
         );
-        await dbContext.Addresses.AddAsync(address,cancellationToken);
 
+        if (existingAddress is null)
+            await dbContext.Addresses.AddAsync(address, cancellationToken);
+
+        var closingScheduleEntries = ValidationHelper.ParseClosingSchedule(request.ClosingSchedule);
         var park = new Park(
             request.Name,
             request.Description!,
-            address
+            address,
+            request.EntranceFee,
+            request.IsFree,
+            request.Organizer,
+            request.ParkType,
+            request.AgeRecommendation
+            
         );
-        await dbContext.Parks.AddAsync(park,cancellationToken);
+        await dbContext.Parks.AddAsync(park, cancellationToken);
 
-        await dbContext.SaveChangesAsync(cancellationToken);
+        if (closingScheduleEntries.Count > 0)
+        {
+            var closingSchedule = new ClosingSchedule(closingScheduleEntries);
+            park.SetClosingSchedule(closingSchedule);
+            await dbContext.AddAsync(closingSchedule, cancellationToken);
+        }
 
-        return Result<int>.Success(park.Id);
+        var uploaded = await fileUpLoad.FilesUpLoader(request.ParkImages, "parks", cancellationToken);
+        if (uploaded.Any(r => !r.IsValid ))
+        {
+            await FileValidation.DeleteUploadedFilesAsync(uploaded, fileUpLoad, cancellationToken);
+            return StatusCodes.Status400BadRequest.CreateProblemResult<CreateParkRequest, int>("ParkImages", "One or more images failed to upload.");
+        }
+
+        var images = uploaded.Select(r => new ParkImage(r.Data!)).ToList();
+        park.AddImages(images);
+
+        var (amenityNames, amenityDescription) = amenityGroup.Data;
+        var amenity = new Amenity { Name = amenityNames, Description = amenityDescription ?? string.Empty };
+        park.AddAmenity(amenity);
+
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+            return Result<int>.Success(park.Id);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to create park '{ParkName}'", request.Name);
+            await FileValidation.DeleteUploadedFilesAsync(uploaded, fileUpLoad, cancellationToken);
+            return StatusCodes.Status500InternalServerError.CreateProblemResult<CreateParkRequest, int>("Park", "Failed to create park.");
+        }
     }
 }

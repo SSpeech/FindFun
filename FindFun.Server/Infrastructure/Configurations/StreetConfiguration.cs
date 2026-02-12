@@ -18,6 +18,7 @@ public class StreetConfiguration : IEntityTypeConfiguration<Street>
         builder.Property(x => x.MunicipioGid).HasColumnName("municipio_gid");
 
         builder.HasIndex(x => x.MunicipioGid);
+        builder.HasIndex(x => new { x.Name, x.MunicipioGid }).IsUnique();
 
         builder.HasOne(x => x.Municipio)
             .WithMany(x => x.Streets)
