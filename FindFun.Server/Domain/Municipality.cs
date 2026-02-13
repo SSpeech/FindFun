@@ -39,7 +39,7 @@ public class Municipality
             Iso31663 = iso31663,
             Type = type,
             LocalName = localName,
-            Geometry = geometry
+            Geometry = geometry,
         };
     }
 }
