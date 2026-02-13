@@ -4,7 +4,7 @@ using FluentAssertions;
 
 namespace FindFund.Server.UnitTest;
 
-public class StreetTest
+public class StreetTestS
 {
     [Theory]
     [MemberData(nameof(GetStreetTestData))]
