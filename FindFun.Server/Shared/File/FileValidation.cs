@@ -18,7 +18,7 @@ public class FileValidation
     }
     public static IEnumerable<ValidationResult> ValidateFile( IFormFile file)
     {
-        var fileSize = 10 << 20;
+        var fileSize = 10 << 20;// 10 MB 
         if (file.Length > fileSize)
             yield return new ValidationResult($"{nameof(file)} exceeded the permitted size.", [nameof(file)]);
 
