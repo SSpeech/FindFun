@@ -18,16 +18,8 @@ public static class DataExtension
     {
         builder.Services.AddOptions<ConnectionStrings>()
             .Bind(builder.Configuration.GetSection(nameof(ConnectionStrings)))
-            .Validate(options =>
-            {
-                if (string.IsNullOrWhiteSpace(options.FindFun))
-                    throw new InvalidOperationException("Connection string 'findfun' not found.");
-
-                if (string.IsNullOrWhiteSpace(options.Blobs))
-                    throw new InvalidOperationException("Connection string 'blobs' not found.");
-                return true;
-            })
-            .ValidateOnStart();
+            .ValidateOnStart()
+            .ValidateDataAnnotations();
 
         return builder;
     }

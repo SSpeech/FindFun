@@ -1,7 +1,13 @@
-﻿namespace FindFun.Server.Infrastructure.Options;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace FindFun.Server.Infrastructure.Options;
 
 public class ConnectionStrings
 {
-    public string FindFun { get; set; } = default!;
-    public string? Blobs { get; set; }
+    [Required]
+    [MinLength(1)]
+    public string FindFun { get; init; } = default!;
+    [Required]
+    [MinLength(1)]
+    public string Blobs { get; init; } = default!;
 }
