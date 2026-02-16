@@ -27,4 +27,8 @@
     <ProjectReference Include="..\..\FindFun.Server\FindFun.Server.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shared\" />
+  </ItemGroup>
+
 </Project>
