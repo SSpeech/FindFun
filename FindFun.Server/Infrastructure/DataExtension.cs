@@ -16,12 +16,18 @@ public static class DataExtension
 
     public static WebApplicationBuilder AddConnectionStrings(this WebApplicationBuilder builder)
     {
-        builder.Services.AddOptions<ConnectionStrings>()
+        if(builder.Environment.IsDevelopment() || builder.Environment.IsProduction())
+        {
+           builder.Services.AddOptions<ConnectionStrings>()
             .Bind(builder.Configuration.GetSection(nameof(ConnectionStrings)))
             .ValidateOnStart()
             .ValidateDataAnnotations();
-
         return builder;
+        }
+
+        builder.Services.AddOptions<ConnectionStrings>()
+             .Bind(builder.Configuration.GetSection(nameof(ConnectionStrings)));
+        return builder; 
     }
 
     public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)

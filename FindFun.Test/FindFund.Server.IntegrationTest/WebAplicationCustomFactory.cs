@@ -100,4 +100,3 @@ public class WebAplicationCustomFactory : WebApplicationFactory<IServerMaker>, I
         await postgresContainer.DisposeAsync();
     }
 }
-
