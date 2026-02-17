@@ -19,7 +19,7 @@ public class FileValidationTests
 
         result.Should().ContainSingle();
         var vr = result.Single();
-        vr.ErrorMessage.Should().Be("file exceeded the permitted size.");
+        vr.ErrorMessage.Should().Be("file exceeded or is below the permitted size.");
         vr.MemberNames.Should().Contain("file");
     }
 
@@ -61,6 +61,18 @@ public class FileValidationTests
         var vr = results.Single();
         vr.ErrorMessage.Should().Be("files No files were provided.");
         vr.MemberNames.Should().Contain("files");
+    }
+    [Fact]
+    public void ValidateFiles_WhenSomeInvalidFileProvided_ReturnsValidationResult()
+    {
+        var validFile = Substitute.For<IFormFile>();
+        validFile.Length.Returns(1024);
+        validFile.FileName.Returns("good.PNG");
+        var file = Substitute.For<IFormFile>();
+        file.Length.Returns(1024);
+        file.FileName.Returns("badfile.txt");
+        var results = FileValidation.ValidateFiles(new FormFileCollection { validFile, file }).ToList();
+        results.Should().ContainSingle();
     }
 
     [Fact]

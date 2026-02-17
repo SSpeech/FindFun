@@ -19,8 +19,8 @@ public class FileValidation
     public static IEnumerable<ValidationResult> ValidateFile( IFormFile file)
     {
         var fileSize = 10 << 20;// 10 MB 
-        if (file.Length > fileSize)
-            yield return new ValidationResult($"{nameof(file)} exceeded the permitted size.", [nameof(file)]);
+        if (file.Length > fileSize || file.Length == 0)
+            yield return new ValidationResult($"{nameof(file)} exceeded or is below the permitted size.", [nameof(file)]);
 
         var permittedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
         var fileExtensions = Path.GetExtension(file.FileName).ToLowerInvariant();
