@@ -23,7 +23,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: restore dependencies
-        run: dotnet restore --configuration Release
+        run: dotnet restore
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
