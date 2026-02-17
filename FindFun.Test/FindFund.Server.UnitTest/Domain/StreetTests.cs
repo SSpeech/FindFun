@@ -8,7 +8,7 @@ public class StreetTestS
 {
     [Theory]
     [MemberData(nameof(GetStreetTestData))]
-    public void Street_ShouldBeCreate_WhenValidDataProvided(string name, Municipality municipality,Address address)
+    public void Street_ShouldBeCreate_WhenValidDataProvided(string name, Municipality municipality, Address address)
     {
         var street = new Street(name, municipality.Gid);
         street.AddAddress(address);
@@ -22,7 +22,7 @@ public class StreetTestS
     }
     [Theory]
     [MemberData(nameof(GetStreetTestData))]
-    public void Street_ShouldBeCreateWithoutAddress_WhenValidDataProvided(string name, Municipality municipality, Address address)
+    public void Street_ShouldBeCreateWithoutAddress_WhenValidDataProvided(string name, Municipality municipality)
     {
         var street = new Street(name, municipality.Gid);
         street.Should().NotBeNull().And.BeOfType<Street>().And.Satisfy<Street>(s =>
@@ -50,7 +50,7 @@ public class StreetTestS
     }
     [Theory]
     [MemberData(nameof(GetStreetTestData))]
-    public void Street_ShouldSetMunicipioId_WhenValidDataProvided(string name, Municipality municipality, Address address)
+    public void Street_ShouldSetMunicipioId_WhenValidDataProvided(string name, Municipality municipality)
     {
         var street = new Street(name, municipality.Gid);
         var newMunicipality = Municipality.Create(

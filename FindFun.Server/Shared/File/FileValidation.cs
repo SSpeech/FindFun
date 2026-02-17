@@ -16,7 +16,7 @@ public class FileValidation
                 yield return result.First();
         }
     }
-    public static IEnumerable<ValidationResult> ValidateFile( IFormFile file)
+    public static IEnumerable<ValidationResult> ValidateFile(IFormFile file)
     {
         var fileSize = 10 << 20;// 10 MB 
         if (file.Length > fileSize || file.Length == 0)
@@ -28,7 +28,7 @@ public class FileValidation
         if (!permittedExtensions.Contains(fileExtensions))
             yield return new ValidationResult($"{nameof(file)} has an invalid file extension.", [nameof(file)]);
     }
-    public static async Task DeleteUploadedFilesAsync( List<Result<string>> fileResult, FileUpLoad fileUpLoad, CancellationToken cancellationToken)
+    public static async Task DeleteUploadedFilesAsync(List<Result<string>> fileResult, FileUpLoad fileUpLoad, CancellationToken cancellationToken)
     {
         await Task.WhenAll(fileResult.Where(r => r.IsValid && r.Data is not null)
             .Select(r => fileUpLoad.DeleteFileAsync(GetRelativePathFromUrl(r.Data!), cancellationToken)));

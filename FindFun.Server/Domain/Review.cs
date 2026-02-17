@@ -6,7 +6,7 @@ namespace FindFun.Server.Domain;
 
 public class Review
 {
-    public Guid Id { get;  private set; }
+    public Guid Id { get; private set; }
     public string Content { get; private set; } = null!;
     public int Rating { get; private set; }
     public DateTime CreatedAt { get; private set; }
