@@ -1,7 +1,7 @@
 ﻿using FindFun.Server.Domain;
 using FluentAssertions;
 
-namespace FindFund.Server.UnitTest;
+namespace FindFund.Server.UnitTest.Domain;
 
 public class MunicipalityTests
 {

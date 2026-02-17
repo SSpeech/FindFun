@@ -3,7 +3,7 @@ using FindFun.Server.Domain;
 using FluentAssertions;
 using NetTopologySuite.Geometries;
 
-namespace FindFund.Server.UnitTest;
+namespace FindFund.Server.UnitTest.Domain;
 
 public class AddressTests
 {

@@ -1,21 +1,24 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using FindFun.Server.Infrastructure.Options;
+using Microsoft.Extensions.Options;
 
 namespace FindFun.Server.Shared.File;
 
-public class FileUpLoad(
-    BlobServiceClient blobServiceClient,
-    IConfiguration configuration)
+public class FileUpLoad(BlobServiceClient blobServiceClient, IOptions<ConnectionStrings> connectionStrings)
 {
+    private readonly BlobServiceClient _blobServiceClient = blobServiceClient;
+    private readonly IOptions<ConnectionStrings> _connectionStrings = connectionStrings;
+
     public async Task<Result<string>> FileUpLoader(IFormFile files, string folderName, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var containerName = configuration["BlobStorage:ContainerName"];
+        var containerName = _connectionStrings.Value?.Blobs;
         if (string.IsNullOrWhiteSpace(containerName))
-            throw new InvalidOperationException("Configuration key 'BlobStorage:ContainerName' not found.");
+            throw new InvalidOperationException("Configuration key 'ConnectionStrings:Blobs' not found.");
 
-        var container = blobServiceClient.GetBlobContainerClient(containerName);
+        var container = _blobServiceClient.GetBlobContainerClient(containerName);
         await container.CreateIfNotExistsAsync(publicAccessType: PublicAccessType.Blob, cancellationToken: cancellationToken);
 
         var fileExtension = Path.GetExtension(files.FileName);
@@ -32,11 +35,11 @@ public class FileUpLoad(
 
     public async Task<Result<bool>> DeleteFileAsync(string relativePath, CancellationToken cancellationToken = default)
     {
-        var containerName = configuration["BlobStorage:ContainerName"];
+        var containerName = _connectionStrings.Value?.Blobs;
         if (string.IsNullOrWhiteSpace(containerName))
-            throw new InvalidOperationException("Configuration key 'BlobStorage:ContainerName' not found.");
+            throw new InvalidOperationException("Configuration key 'ConnectionStrings:Blobs' not found.");
 
-        var container = blobServiceClient.GetBlobContainerClient(containerName);
+        var container = _blobServiceClient.GetBlobContainerClient(containerName);
 
         var blobName = relativePath.TrimStart('/');
         var blobClient = container.GetBlobClient(blobName);

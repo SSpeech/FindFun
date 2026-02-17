@@ -1,4 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure.Storage.Blobs;
+using FindFun.Server.Infrastructure.Options;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace FindFun.Server.Infrastructure;
 
@@ -11,13 +14,40 @@ public static class DataExtension
         await context.Database.MigrateAsync();
     }
 
-    public static void  AddDatabase(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddConnectionStrings(this WebApplicationBuilder builder)
     {
-        var connectionString = builder.Configuration.GetConnectionString("findfun");
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("Connection string 'findfun' not found.");
+        builder.Services.AddOptions<ConnectionStrings>()
+            .Bind(builder.Configuration.GetSection(nameof(ConnectionStrings)))
+            .ValidateOnStart()
+            .ValidateDataAnnotations();
 
-        builder.Services.AddDbContext<FindFunDbContext>(options =>
-            options.UseNpgsql(connectionString, npgsql => npgsql.UseNetTopologySuite()));
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddDatabase(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddDbContext<FindFunDbContext>((serviceProvider, options) =>
+        {
+            var dbOptions = serviceProvider.GetRequiredService<IOptions<ConnectionStrings>>().Value;
+            var connectionString = dbOptions?.FindFun;
+            options.UseNpgsql(connectionString, npgsql => npgsql.UseNetTopologySuite());
+        });
+
+        return builder;
+    }
+
+    public static WebApplicationBuilder AddBlobStorage(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddSingleton(sp =>
+        {
+            var env = sp.GetRequiredService<IWebHostEnvironment>();
+            var connOptions = sp.GetRequiredService<IOptions<ConnectionStrings>>().Value;
+            var connectionString = connOptions?.Blobs
+                ?? (env.IsDevelopment() ? "UseDevelopmentStorage=true" : null);
+
+            return new BlobServiceClient(connectionString);
+        });
+
+        return builder;
     }
 }

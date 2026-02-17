@@ -3,7 +3,7 @@ using FluentAssertions;
 using Xunit;
 using System.Linq;
 
-namespace FindFund.Server.UnitTest;
+namespace FindFund.Server.UnitTest.Domain;
 
 public class ClosingScheduleTests
 {

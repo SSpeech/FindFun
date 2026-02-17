@@ -17,7 +17,7 @@ public class CreateParkHandler(FindFunDbContext dbContext, ILogger<CreateParkHan
             var validationResult = fileValidationResult.First();
             return StatusCodes.Status400BadRequest.CreateProblemResult<CreateParkRequest, int>(validationResult.MemberNames.FirstOrDefault() ?? "ParkImages", validationResult.ErrorMessage!);
         }
-
+        // use transaction
         var entranceFee = ValidationHelper.ValidateEntrance(request.IsFree, request.EntranceFee);
         if (!entranceFee.IsValid)
             return Result<int>.Failure(entranceFee.ProblemDetails!);

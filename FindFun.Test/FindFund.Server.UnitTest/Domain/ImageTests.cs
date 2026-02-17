@@ -2,7 +2,7 @@ using FindFun.Server.Domain;
 using FluentAssertions;
 using Xunit;
 
-namespace FindFund.Server.UnitTest;
+namespace FindFund.Server.UnitTest.Domain;
 
 public class ImageTests
 {

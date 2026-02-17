@@ -1,10 +1,7 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using FindFun.Server.Domain;
+﻿using FindFun.Server.Domain;
 using FluentAssertions;
-using Xunit;
 
-namespace FindFund.Server.UnitTest;
+namespace FindFund.Server.UnitTest.Domain;
 
 public class ParkTests
 {
@@ -53,6 +50,7 @@ public class ParkTests
         park.ClosingSchedule.Should().NotBeNull().And.BeOfType<ClosingSchedule>().And.Be(schedule);
         schedule.ParkId.Should().Be(park.Id);
     }
+
     [Theory]
     [MemberData(nameof(GetValidParkData))]
     public void ClosingSchedule_ShouldBeNull_WhenClear(string name, string description, double entranceFee, bool isFree, string organizer, string parkType, string ageRecommendation, Address address)
@@ -188,7 +186,7 @@ public class ParkTests
     }
     public static TheoryData<string, string, double, bool, string, string, string,Address> GetValidParkData()
     {
-       var street =  new Street("Main Street", 1);
+        var street =  new Street("Main Street", 1);
         var address = new Address(line1: "123 Main St", postalCode: "00000", street, longitude: 10.0, 20.0, number: "1A");
         return new TheoryData<string, string, double, bool, string, string, string, Address>
         {

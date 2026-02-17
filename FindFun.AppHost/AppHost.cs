@@ -1,11 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
-var postgresPassword = builder.AddParameter("postgres-password", secret: true);
-
 var postgres = builder.AddPostgres("postgres")
     .WithImage("postgis/postgis")
     .WithDataVolume()
-    .WithPassword(postgresPassword)
     .WithPgAdmin();
 
 var db = postgres.AddDatabase("findfun");
