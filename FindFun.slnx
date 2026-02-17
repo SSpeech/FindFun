@@ -5,6 +5,8 @@
   </Project>
   <Project Path="FindFun.Server/FindFun.Server.csproj" />
   <Project Path="FindFun.ServiceDefaults/FindFun.ServiceDefaults.csproj" />
-  <Project Path="FindFun.Test/FindFund.Server.IntegrationTest/FindFund.Server.IntegrationTest.csproj" Id="573bd580-96f9-4c2e-973f-9779d2eff7e9" />
+  <Project Path="FindFun.Test/FindFund.Server.IntegrationTest/FindFund.Server.IntegrationTest.csproj" Id="573bd580-96f9-4c2e-973f-9779d2eff7e9">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
   <Project Path="FindFun.Test/FindFund.Server.UnitTest/FindFund.Server.UnitTest.csproj" Id="064fab8c-f718-4d11-8e6d-dd5b3d74090d" />
 </Solution>

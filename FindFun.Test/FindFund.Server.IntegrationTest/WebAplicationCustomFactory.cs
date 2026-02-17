@@ -25,7 +25,7 @@ public class WebAplicationCustomFactory : WebApplicationFactory<IServerMaker>, I
     private readonly PostgreSqlContainer postgresContainer = new PostgreSqlBuilder("postgres:16")
               .WithImage("postgis/postgis:15-3.4")
               .Build();
-    private readonly AzuriteContainer azuriteContainer  = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite").Build();
+    private readonly AzuriteContainer azuriteContainer = new AzuriteBuilder("mcr.microsoft.com/azure-storage/azurite").Build();
     public WebAplicationCustomFactory()
     {
         var geometryFactory = NetTopologySuite.NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326);
@@ -96,8 +96,7 @@ public class WebAplicationCustomFactory : WebApplicationFactory<IServerMaker>, I
     async Task IAsyncLifetime.DisposeAsync()
     {
         _scope?.Dispose();
-          await azuriteContainer.DisposeAsync();
+        await azuriteContainer.DisposeAsync();
         await postgresContainer.DisposeAsync();
     }
 }
-

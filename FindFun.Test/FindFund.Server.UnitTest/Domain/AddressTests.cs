@@ -11,7 +11,7 @@ public class AddressTests
     [MemberData(nameof(GetAddressTestData))]
     public void Address_ShouldBeCreate_WhenValidDataProvided(Street street, double latitude, double longitude)
     {
-        var address = new Address(line1: "123 Main St", postalCode: "10001", street,longitude,latitude,number: "123");
+        var address = new Address(line1: "123 Main St", postalCode: "10001", street, longitude, latitude, number: "123");
 
         address.Should().NotBeNull().And.BeOfType<Address>();
 
@@ -26,22 +26,23 @@ public class AddressTests
     }
     [Theory]
     [MemberData(nameof(GetAddressTestData))]
-    public void AddressSetStreet_ShouldBeSetWhenValidDataProvided( Street street, double latitude, double longitude)
+    public void AddressSetStreet_ShouldBeSetWhenValidDataProvided(Street street, double latitude, double longitude)
     {
-        var address =  new Address(line1: "Main street", postalCode: "10001", null!, longitude, latitude, number: "123");
+        var address = new Address(line1: "Main street", postalCode: "10001", null!, longitude, latitude, number: "123");
         address.Street.Should().BeNull();
         address.SetStreet(street);
         address.Street.Should().NotBeNull().And.BeOfType<Street>().Which.Should().Be(street);
         address.Coordinates.Should().NotBeNull().And.BeOfType<Point>().And.Satisfy<Point>(p =>
-        { p.X.Should().Be(longitude);
-          p.Y.Should().Be(latitude);
+        {
+            p.X.Should().Be(longitude);
+            p.Y.Should().Be(latitude);
         });
     }
     [Theory]
     [MemberData(nameof(GetAddressTestData))]
-    public void AddressStreet_ShouldBeSetNullWhenNullDataProvided( Street street, double latitude, double longitude)
+    public void AddressStreet_ShouldBeSetNullWhenNullDataProvided(Street street, double latitude, double longitude)
     {
-        var address =  new Address(line1: "Main street", postalCode: "10001", street!, longitude, latitude, number: "123");
+        var address = new Address(line1: "Main street", postalCode: "10001", street!, longitude, latitude, number: "123");
         address.Street.Should().NotBeNull();
         address.SetStreet(null);
         address.Street.Should().BeNull();
@@ -57,9 +58,9 @@ public class AddressTests
     }
     [Theory]
     [MemberData(nameof(GetAddressTestData))]
-    public void AddressCoordinates_ShouldBeSetWhenValidDataProvided( Street street, double latitude, double longitude)
+    public void AddressCoordinates_ShouldBeSetWhenValidDataProvided(Street street, double latitude, double longitude)
     {
-        var address =  new Address(line1: "Main street", postalCode: "10001", street!, longitude:0, latitude:0, number: "123");
+        var address = new Address(line1: "Main street", postalCode: "10001", street!, longitude: 0, latitude: 0, number: "123");
         address.Street.Should().NotBeNull();
         address.SetStreet(null);
         address.SetStreetId(street.Id);
@@ -76,7 +77,7 @@ public class AddressTests
             p.Y.Should().Be(latitude);
         });
     }
-    public static TheoryData<Street,double,double> GetAddressTestData()
+    public static TheoryData<Street, double, double> GetAddressTestData()
     {
         var latitude = 40.7128;
         var longitude = -74.0060;
@@ -95,7 +96,7 @@ public class AddressTests
                 localName: "New York",
                 geometry: geometry
             );
-            var street = new Street(name: "Main Street", municipalityId: municipality.Gid);
-            return  new TheoryData< Street, double, double> { { street, latitude, longitude } };
+        var street = new Street(name: "Main Street", municipalityId: municipality.Gid);
+        return new TheoryData<Street, double, double> { { street, latitude, longitude } };
     }
 }

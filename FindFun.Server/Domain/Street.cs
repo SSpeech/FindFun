@@ -12,7 +12,7 @@ public class Street
 
     protected Street()
     {
-        
+
     }
     public Street(string name, int municipalityId)
     {

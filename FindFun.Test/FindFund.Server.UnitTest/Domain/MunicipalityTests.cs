@@ -19,7 +19,7 @@ public class MunicipalityTests
         municipality.OfficialNa.Should().Be(municipality.OfficialNa);
         municipality.OfficialCo3.Should().Be(municipality.OfficialCo3);
         municipality.OfficialNa4.Should().Be(municipality.OfficialNa4);
-        municipality.OfficialCo5.Should().Be(municipality.OfficialCo5); 
+        municipality.OfficialCo5.Should().Be(municipality.OfficialCo5);
         municipality.OfficialNa6.Should().Be(municipality.OfficialNa6);
         municipality.Iso31663.Should().Be(municipality.Iso31663);
         municipality.Type.Should().Be(municipality.Type);

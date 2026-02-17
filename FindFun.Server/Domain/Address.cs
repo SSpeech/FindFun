@@ -16,7 +16,6 @@ public class Address
 
     protected Address()
     {
-        
     }
 
     public Address(
@@ -24,7 +23,7 @@ public class Address
         string postalCode,
         Street street,
         double longitude,
-        double latitude,string number)
+        double latitude, string number)
     {
 
         Line = line1;

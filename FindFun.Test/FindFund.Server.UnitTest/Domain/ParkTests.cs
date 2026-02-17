@@ -184,9 +184,9 @@ public class ParkTests
         park.Images.Should().BeNullOrEmpty();
 
     }
-    public static TheoryData<string, string, double, bool, string, string, string,Address> GetValidParkData()
+    public static TheoryData<string, string, double, bool, string, string, string, Address> GetValidParkData()
     {
-        var street =  new Street("Main Street", 1);
+        var street = new Street("Main Street", 1);
         var address = new Address(line1: "123 Main St", postalCode: "00000", street, longitude: 10.0, 20.0, number: "1A");
         return new TheoryData<string, string, double, bool, string, string, string, Address>
         {
