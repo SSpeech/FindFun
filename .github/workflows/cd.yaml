@@ -5,7 +5,7 @@ env:
 
 on:
   pull_request:
-      branches: [ "main" ]
+      branches: [ "master" ]
   workflow_dispatch:
 
 jobs:
@@ -25,11 +25,11 @@ jobs:
       - name: restore dependencies
         run: dotnet restore --configuration Release
 
-      - name: dotnet format
-        run: dotnet format -v detailed --verify-no-changes
-
       - name: Build with dotnet
         run: dotnet build --configuration Release
 
       - name: dotnet test
         run: dotnet test --configuration Release --no-build
+        
+      - name: dotnet format
+        run: dotnet format -v detailed --verify-no-changes
