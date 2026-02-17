@@ -53,7 +53,7 @@ public class FileValidationTests
     [Fact]
     public void ValidateFiles_WhenNoFilesProvided_ReturnsValidationResult()
     {
-       IFormFileCollection files = Substitute.For<IFormFileCollection>();
+        IFormFileCollection files = Substitute.For<IFormFileCollection>();
         files.Count.Returns(0);
         var results = FileValidation.ValidateFiles(files).ToList();
 

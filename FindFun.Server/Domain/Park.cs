@@ -31,7 +31,7 @@ public class Park
     {
     }
 
-    public Park(string name, string description, Address address,decimal entranceFee, bool isFree, string?
+    public Park(string name, string description, Address address, decimal entranceFee, bool isFree, string?
         organizer, string parkType, string? ageRecomandation)
     {
         Name = name;

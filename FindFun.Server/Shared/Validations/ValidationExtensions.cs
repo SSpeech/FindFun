@@ -14,12 +14,12 @@ public static class ProblemDetailsResultExtensions
         bool isValid = Validator.TryValidateObject(obj!, context, results, true);
 
         if (isValid)
-            return  Result<T>.Success();
+            return Result<T>.Success();
 
         return BuildValidationProblemResult<T>(includeAllErrors, results);
     }
 
-    private static  Result<T> BuildValidationProblemResult<T>(bool includeAllErrors, List<ValidationResult> results)
+    private static Result<T> BuildValidationProblemResult<T>(bool includeAllErrors, List<ValidationResult> results)
     {
         var modelState = new ModelStateDictionary();
         var errorsToProcess = includeAllErrors ? results : results.Take(1);
@@ -36,10 +36,10 @@ public static class ProblemDetailsResultExtensions
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1"
         };
 
-        return  Result<T>.Failure(problemDetails);
+        return Result<T>.Failure(problemDetails);
     }
 
-    public static  Result<TResult> CreateProblemResult<T, TResult>(string fieldName, string errorMessage, int statusCode = StatusCodes.Status404NotFound)
+    public static Result<TResult> CreateProblemResult<T, TResult>(string fieldName, string errorMessage, int statusCode = StatusCodes.Status404NotFound)
     {
         var (title, type) = GetProblemDetailsTitleAndType(statusCode);
         var problemDetails = new ValidationProblemDetails
@@ -50,7 +50,7 @@ public static class ProblemDetailsResultExtensions
         };
         problemDetails.Errors.Add(fieldName, [errorMessage]);
 
-        return  Result<TResult>.Failure(problemDetails);
+        return Result<TResult>.Failure(problemDetails);
     }
 
     private static (string Title, string Type) GetProblemDetailsTitleAndType(int statusCode)

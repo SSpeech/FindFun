@@ -1,6 +1,6 @@
 ﻿namespace FindFun.Server.Domain;
 
-public class Event 
+public class Event
 {
     public int Id { get; private set; }
     public string Title { get; private set; } = null!;

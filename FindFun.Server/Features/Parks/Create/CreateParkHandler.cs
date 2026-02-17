@@ -92,7 +92,7 @@ public class CreateParkHandler(FindFunDbContext dbContext, ILogger<CreateParkHan
             request.Organizer,
             request.ParkType,
             request.AgeRecommendation
-            
+
         );
         await dbContext.Parks.AddAsync(park, cancellationToken);
 
@@ -104,7 +104,7 @@ public class CreateParkHandler(FindFunDbContext dbContext, ILogger<CreateParkHan
         }
 
         var uploaded = await fileUpLoad.FilesUpLoader(request.ParkImages, "parks", cancellationToken);
-        if (uploaded.Any(r => !r.IsValid ))
+        if (uploaded.Any(r => !r.IsValid))
         {
             await FileValidation.DeleteUploadedFilesAsync(uploaded, fileUpLoad, cancellationToken);
             return StatusCodes.Status400BadRequest.CreateProblemResult<CreateParkRequest, int>("ParkImages", "One or more images failed to upload.");

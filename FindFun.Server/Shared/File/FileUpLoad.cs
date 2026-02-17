@@ -28,7 +28,7 @@ public class FileUpLoad(BlobServiceClient blobServiceClient, IOptions<Connection
         var blobClient = container.GetBlobClient(blobName);
 
         await using var stream = files.OpenReadStream();
-        await blobClient.UploadAsync( stream, new BlobHttpHeaders { ContentType = files.ContentType },cancellationToken: cancellationToken);
+        await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = files.ContentType }, cancellationToken: cancellationToken);
 
         return Result<string>.Success(blobClient.Uri.ToString());
     }

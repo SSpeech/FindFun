@@ -20,7 +20,7 @@ public static class ValidationHelper
 
         return Result<CoordinateDto>.Failure(new ValidationProblemDetails
         {
-            Errors = new Dictionary<string, string[]> {{ "Coordinates",["Invalid coordinate format."] } }
+            Errors = new Dictionary<string, string[]> { { "Coordinates", ["Invalid coordinate format."] } }
         });
     }
 
@@ -52,7 +52,7 @@ public static class ValidationHelper
         {
             return Result<(string, string?)>.Failure(new ValidationProblemDetails
             {
-                Errors = new Dictionary<string, string[]> { { "Amenities", ["Amenities cannot be empty." ] } }
+                Errors = new Dictionary<string, string[]> { { "Amenities", ["Amenities cannot be empty."] } }
             });
         }
 

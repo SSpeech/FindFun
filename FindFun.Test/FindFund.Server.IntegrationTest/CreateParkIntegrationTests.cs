@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace FindFund.Server.IntegrationTest;
+
 public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFactory>
 {
     private readonly WebAplicationCustomFactory _factory;
@@ -33,10 +34,10 @@ public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFacto
     [MemberData(nameof(InvalidFileData))]
     public async Task CreatePark_ShouldReturnBadRequest_WhenInvalidFileProvided(string formFieldName, string fileName, byte[] fileBytes, string contentType, string expectedErrorMessage)
     {
-      var response = await PostAsync(formFieldName, fileName, fileBytes, contentType);
+        var response = await PostAsync(formFieldName, fileName, fileBytes, contentType);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var validationProblemDetails  = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails.Status.Should().Be((int)response.StatusCode);
         validationProblemDetails.Title.Should().Be("Bad Request");

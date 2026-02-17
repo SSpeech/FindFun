@@ -40,7 +40,7 @@ public class GeorefSpainMunicipioMillesimeConfiguration : IEntityTypeConfigurati
         builder.Property(x => x.OfficialNa6)
             .HasColumnName("official_na__6")
             .HasMaxLength(255);
-        builder.HasIndex(x=> x.OfficialNa6);
+        builder.HasIndex(x => x.OfficialNa6);
 
         builder.Property(x => x.Iso31663)
             .HasColumnName("iso_3166_3")
