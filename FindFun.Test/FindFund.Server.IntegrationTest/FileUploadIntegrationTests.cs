@@ -29,7 +29,7 @@ public class FileUploadIntegrationTests(WebAplicationCustomFactory factory) : IC
         var deleteAgain = await fileUpLoad.DeleteFileAsync(relativePath, CancellationToken.None);
         deleteAgain.IsValid.Should().BeFalse();
         deleteAgain.Data.Should().BeFalse();
-       
+
     }
     [Fact]
     public async Task DeleteFileAsync_DeletesUploadedFile()

@@ -63,7 +63,7 @@ public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFacto
     [MemberData(nameof(WebApplicationTestData.ValidFileData), MemberType = typeof(WebApplicationTestData))]
     public async Task CreatePark_ShouldReturnBadRequest_WhenLocalityNotFound(RequestCaseData testCase)
     {
-        var multipart = WebApplicationTestData.CreateBaseMultipart("NonExistentLocality",testCase);
+        var multipart = WebApplicationTestData.CreateBaseMultipart("NonExistentLocality", testCase);
         AddFiles(testCase.FormFieldName!, testCase.FileName!, testCase.FileBytes!, testCase.ContentType!, multipart);
 
         var response = await _httpClient.PostAsync("/parks", multipart);
@@ -154,7 +154,7 @@ public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFacto
         var createdId = JsonSerializer.Deserialize<int>(responseString);
         createdId.Should().BeGreaterThan(0);
 
-       var park = await _factory.GetParkByIdAsync(createdId);
+        var park = await _factory.GetParkByIdAsync(createdId);
 
         park.Should().NotBeNull("park should be created and retrievable from DB");
         park!.ClosingSchedule.Should().NotBeNull("closing schedule should be saved when provided");
