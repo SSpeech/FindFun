@@ -1,9 +1,7 @@
-using Azure.Storage.Blobs;
 using FindFun.Server.Features.Parks;
 using FindFun.Server.Features.Parks.Create;
 using FindFun.Server.Infrastructure;
 using FindFun.Server.Shared.File;
-using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 

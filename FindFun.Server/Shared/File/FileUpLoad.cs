@@ -40,8 +40,12 @@ public class FileUpLoad(BlobServiceClient blobServiceClient, IOptions<Connection
             throw new InvalidOperationException("Configuration key 'ConnectionStrings:Blobs' not found.");
 
         var container = _blobServiceClient.GetBlobContainerClient(containerName);
-
         var blobName = relativePath.TrimStart('/');
+        var idx = blobName.IndexOf(containerName + '/');
+        if (idx >= 0)
+        {
+            blobName = blobName[(idx + containerName.Length + 1)..];
+        }
         var blobClient = container.GetBlobClient(blobName);
 
         var response = await blobClient.DeleteIfExistsAsync(cancellationToken: cancellationToken);
