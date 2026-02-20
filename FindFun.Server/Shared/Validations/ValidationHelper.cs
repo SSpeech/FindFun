@@ -2,7 +2,6 @@ using FindFun.Server.Domain;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 using System.ComponentModel.DataAnnotations;
-using FindFun.Server.Shared.Validations;
 
 namespace FindFun.Server.Shared;
 
@@ -26,6 +25,7 @@ public static class ValidationHelper
 
     public static List<ClosingScheduleEntry> ParseClosingSchedule(string? closingSchedule)
     {
+        // this should be improved later to consider errprs 
         var result = new List<ClosingScheduleEntry>();
         if (!string.IsNullOrWhiteSpace(closingSchedule))
         {
@@ -48,6 +48,7 @@ public static class ValidationHelper
 
     public static Result<(string, string?)> ParseAmenityGroup(string amenities)
     {
+        // here the code should be imporoved to ensure the error case works as expected
         if (string.IsNullOrWhiteSpace(amenities))
         {
             return Result<(string, string?)>.Failure(new ValidationProblemDetails
@@ -71,7 +72,7 @@ public static class ValidationHelper
             {
                 Errors = new Dictionary<string, string[]>
                 {
-                    { "EntraceFee", ["Entrance fee must be greater than 0." ]}
+                    { "EntranceFee", ["Entrance fee must be greater than 0." ]}
                 }
             });
         }

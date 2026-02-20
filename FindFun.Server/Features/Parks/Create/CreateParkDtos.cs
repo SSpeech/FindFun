@@ -24,17 +24,17 @@ public record CreateParkRequest(
      [Required]
      string Coordinates,
 
-    [StringLength(200)]
+    [StringLength(500, MinimumLength = 2)]
      string? FormattedAddress,
 
     [StringLength(100, MinimumLength = 2)]
      string? Street,
 
-    [StringLength(20)]
+    [StringLength(20, MinimumLength = 1)]
      string? Number,
 
-    [StringLength(100)]
-     string? Locality,
+    [StringLength(100, MinimumLength = 2)]
+    string? Locality,
 
     [StringLength(5, MinimumLength = 5)]
      string? PostalCode

@@ -1,4 +1,3 @@
-using FindFun.Server.Shared;
 using FindFun.Server.Shared.File;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;

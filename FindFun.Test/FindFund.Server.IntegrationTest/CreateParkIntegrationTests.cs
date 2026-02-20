@@ -1,3 +1,6 @@
+using FindFun.Server.Domain;
+using FindFun.Server.Shared;
+using FindFun.Server.Shared.Validations;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -11,18 +14,75 @@ public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFacto
 {
     private readonly WebAplicationCustomFactory _factory;
     private readonly HttpClient _httpClient;
+    private const string BadHttpRequestException = "Microsoft.AspNetCore.Http.BadHttpRequestException";
     public CreateParkIntegrationTests(WebAplicationCustomFactory factory)
     {
         _factory = factory;
         _httpClient = _factory.CreateClient();
     }
+    [Fact]
+    public async Task CreatePark_ShouldReturnBadRequest_WhenNoDataProvided()
+    {
+        var response = await _httpClient.PostAsync("/parks", new MultipartFormDataContent());
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails.Status.Should().Be((int)response.StatusCode);
+        validationProblemDetails.Title.Should().Be(BadHttpRequestException);
+        validationProblemDetails.Type.Should().Be(ProblemDetailsConstants.BadRequest);
+    }
+    [Fact]
+    public async Task CreatePark_ShouldReturnBadRequest_WhenRequiredFieldsMissing()
+    {
+        var multipart = new MultipartFormDataContent
+        {
+            { new StringContent("Test Park"), "Name" },
+            { new StringContent("A nice park"), "Description" }
+        };
+        var response = await _httpClient.PostAsync("/parks", multipart);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails.Status.Should().Be((int)response.StatusCode);
+        validationProblemDetails.Title.Should().Be(BadHttpRequestException);
+    }
 
     [Theory]
-    [MemberData(nameof(validFileData))]
-    public async Task CreatePark_ShouldCreatesPark_WhenValidDataProvided_ReturnsId(string formFieldName, string fileName, byte[] fileBytes, string contentType)
+    [MemberData(nameof(WebApplicationTestData.ValidFileData), MemberType = typeof(WebApplicationTestData))]
+    public async Task CreatePark_ShouldReturnBadRequest_WhenValidationFails(RequestCaseData requestCaseData)
     {
-        HttpResponseMessage response = await PostAsync(formFieldName, fileName, fileBytes, contentType);
+        var multipart = WebApplicationTestData.CreateBaseMultipart(string.Empty, requestCaseData);
+        var response = await _httpClient.PostAsync("/parks", multipart);
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails.Status.Should().Be((int)response.StatusCode);
+        validationProblemDetails.Title.Should().Be("One or more validation errors occurred.", "the locality cannot be empty");
+    }
+    [Theory]
+    [MemberData(nameof(WebApplicationTestData.ValidFileData), MemberType = typeof(WebApplicationTestData))]
+    public async Task CreatePark_ShouldReturnBadRequest_WhenLocalityNotFound(RequestCaseData testCase)
+    {
+        var multipart = WebApplicationTestData.CreateBaseMultipart("NonExistentLocality",testCase);
+        AddFiles(testCase.FormFieldName!, testCase.FileName!, testCase.FileBytes!, testCase.ContentType!, multipart);
 
+        var response = await _httpClient.PostAsync("/parks", multipart);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails.Status.Should().Be((int)response.StatusCode);
+        validationProblemDetails.Title.Should().Be("Bad Request");
+        validationProblemDetails!.Errors.Should().ContainKey("Locality").And.HaveCount(1);
+        var localityErrors = validationProblemDetails.Errors["Locality"];
+        localityErrors.Should().HaveCount(1).And.Contain("Locality not found.");
+    }
+
+    [Theory]
+    [MemberData(nameof(WebApplicationTestData.ValidFileData), MemberType = typeof(WebApplicationTestData))]
+    public async Task CreatePark_ShouldCreates_WhenValidDataProvided_ReturnsId(RequestCaseData requestCaseData)
+    {
+        HttpResponseMessage response = await PostAsync(requestCaseData);
         // Assert
         response.EnsureSuccessStatusCode();
         var responseString = await response.Content.ReadAsStringAsync();
@@ -30,69 +90,94 @@ public class CreateParkIntegrationTests : IClassFixture<WebAplicationCustomFacto
         createdId.Should().BeGreaterThan(0);
     }
 
-    [Theory]
-    [MemberData(nameof(InvalidFileData))]
-    public async Task CreatePark_ShouldReturnBadRequest_WhenInvalidFileProvided(string formFieldName, string fileName, byte[] fileBytes, string contentType, string expectedErrorMessage)
+    [Fact]
+    public async Task CreatePark_ShouldReturnConflict_WhenAddressAlreadyExists()
     {
-        var response = await PostAsync(formFieldName, fileName, fileBytes, contentType);
+        await _factory.AddMunicipality();
+        await _factory.AddParkWithAddressAsync(_factory.MunicipalityName);
 
+
+        var requestCaseData = new RequestCaseData(
+            Locality: _factory.MunicipalityName,
+            FormFieldName: "ParkImages",
+            FileName: "image.png",
+            FileBytes: [0x89, 0x50, 0x4E, 0x47],
+            ContentType: "image/png",
+            ExpectedErrorKey: null,
+            ExpectedErrorMessage: null);
+
+        var multipart = WebApplicationTestData.CreateBaseMultipart(_factory.MunicipalityName, requestCaseData);
+        AddFiles("ParkImages", "image.png", [0x89, 0x50, 0x4E, 0x47], "image/png", multipart);
+        var response = await _httpClient.PostAsync("/parks", multipart);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Conflict);
+        var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        validationProblemDetails.Should().NotBeNull();
+        validationProblemDetails!.Errors.Should().ContainKey("Address");
+    }
+
+    [Theory]
+    [MemberData(nameof(WebApplicationTestData.InvalidRequestData), MemberType = typeof(WebApplicationTestData))]
+    public async Task CreatePark_ShouldReturnBadRequest_ForVariousInvalidRequests(RequestCaseData testCase)
+    {
+
+        await _factory.AddMunicipality();
+
+        var multipart = WebApplicationTestData.CreateBaseMultipart(_factory.MunicipalityName, testCase);
+
+        AddFiles(testCase.FormFieldName!, testCase.FileName!, testCase.FileBytes!, testCase.ContentType!, multipart);
+
+        var response = await _httpClient.PostAsync("/parks", multipart);
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         var validationProblemDetails = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         validationProblemDetails.Should().NotBeNull();
         validationProblemDetails.Status.Should().Be((int)response.StatusCode);
-        validationProblemDetails.Title.Should().Be("Bad Request");
-        validationProblemDetails!.Errors.Should().ContainKey("file").And.HaveCount(1);
-        var fileErrors = validationProblemDetails.Errors["file"];
-        fileErrors.Should().HaveCount(1).And.Contain(expectedErrorMessage);
+
+        if (!string.IsNullOrEmpty(testCase.ExpectedErrorKey))
+        {
+            validationProblemDetails!.Errors.Should().ContainKey(testCase.ExpectedErrorKey).And.HaveCount(1);
+            var errors = validationProblemDetails.Errors[testCase.ExpectedErrorKey];
+            errors.Should().HaveCount(1).And.Contain(testCase.ExpectedErrorMessage);
+        }
     }
-    private async Task<HttpResponseMessage> PostAsync(string formFieldName, string fileName, byte[] fileBytes, string contentType)
+    [Theory]
+    [MemberData(nameof(WebApplicationTestData.ValidFileData), MemberType = typeof(WebApplicationTestData))]
+    public async Task CreatePark_Persists_ClosingSchedule_Images_And_Amenity(RequestCaseData requestCaseData)
+    {
+        var requestWithSchedule = requestCaseData with { ClosingSchedule = "Mon:09-17" };
+
+        // Act
+        var response = await PostAsync(requestWithSchedule);
+
+        response.EnsureSuccessStatusCode();
+        var responseString = await response.Content.ReadAsStringAsync();
+        var createdId = JsonSerializer.Deserialize<int>(responseString);
+        createdId.Should().BeGreaterThan(0);
+
+       var park = await _factory.GetParkByIdAsync(createdId);
+
+        park.Should().NotBeNull("park should be created and retrievable from DB");
+        park!.ClosingSchedule.Should().NotBeNull("closing schedule should be saved when provided");
+        park.Images.Should().NotBeNull().And.NotBeEmpty("uploaded images should be associated with the park");
+        park.Amenities.Should().NotBeNull().And.NotBeEmpty("amenity should be added to the park");
+        park.Amenities.First().Amenity.Should().NotBeNull();
+        park.Amenities.First().Amenity!.Name.Should().Be(ValidationHelper.ParseAmenityGroup(requestWithSchedule.AmenityGroup).Data.Item1);
+    }
+
+    private async Task<HttpResponseMessage> PostAsync(RequestCaseData requestCase)
     {
         await _factory.AddMunicipality();
-
-        var multipart = CreateBaseMultipart(_factory.MunicipalityName);
-
-        var byteContent = new ByteArrayContent(fileBytes);
-        byteContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-        multipart.Add(byteContent, formFieldName, fileName);
-
+        var multipart = WebApplicationTestData.CreateBaseMultipart(_factory.MunicipalityName, requestCase);
+        AddFiles(requestCase.FormFieldName!, requestCase.FileName!, requestCase.FileBytes!, requestCase.ContentType!, multipart);
         var response = await _httpClient.PostAsync("/parks", multipart);
         return response;
     }
 
-
-    public static TheoryData<string, string, byte[], string, string> InvalidFileData() => new()
+    private static void AddFiles(string formFieldName, string fileName, byte[] fileBytes, string contentType, MultipartFormDataContent multipart)
     {
-     { "ParkImages", "invalid.txt", new byte[] { 0x00, 0x01, 0x02 }, "text/plain", "file has an invalid file extension." },
-     { "ParkImages", "empty.png", new byte[0], "image/png", "file exceeded or is below the permitted size." }
-    };
-    public static TheoryData<string, string, byte[], string> validFileData() => new()
-    {
-     { "ParkImages", "invalid.webp", new byte[] { 137, 80, 78, 71, 13, 10, 26, 10 }, "image/webp"},
-     { "ParkImages", "empty.png", new byte[]{137, 80, 78, 71, 13, 10, 26, 10}, "image/png"}
-    };
-
-    private static MultipartFormDataContent CreateBaseMultipart(string locality, string parkName = "Test Park")
-    {
-        return new MultipartFormDataContent
-        {
-            { new StringContent(parkName), "Name" },
-            { new StringContent("A nice park"), "Description" },
-            { new StringContent("Tester"), "Organizer" },
-            { new StringContent("false"), "IsFree" },
-            { new StringContent("5.00"), "EntranceFee" },
-            { new StringContent("Playground:Children area"), "Amenities" },
-            { new StringContent("Public"), "ParkType" },
-            { new StringContent(string.Empty), "ClosingSchedule" },
-            { new StringContent("-3.70379,40.41678"), "Coordinates" },
-            { new StringContent("Some formatted address"), "FormattedAddress" },
-            { new StringContent("Main Street"), "Street" },
-            { new StringContent("1"), "Number" },
-            { new StringContent("ABC123"), "AgeRecommendation" },
-            { new StringContent(locality), "Locality" },
-            { new StringContent("12345"), "PostalCode" }
-        };
+        var byteContent = new ByteArrayContent(fileBytes);
+        byteContent.Headers.ContentType = new MediaTypeHeaderValue(contentType);
+        multipart.Add(byteContent, formFieldName, fileName);
     }
 
-
 }
-
